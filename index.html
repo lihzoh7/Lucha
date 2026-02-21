@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SPACE GLASS - Reward Login</title>
+<style>
+body{
+  margin:0;
+  font-family: Arial, sans-serif;
+  background:linear-gradient(135deg,#001f3f,#003366);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+.card{
+  background:#0a2540;
+  padding:40px;
+  border-radius:16px;
+  width:320px;
+  box-shadow:0 15px 40px rgba(0,0,0,0.5);
+}
+h2{
+  color:white;
+  text-align:center;
+  margin-bottom:30px;
+}
+input{
+  width:100%;
+  padding:12px;
+  margin-bottom:15px;
+  border:none;
+  border-radius:8px;
+  background:#122c4a;
+  color:white;
+}
+button{
+  width:100%;
+  padding:12px;
+  background:#00c853;
+  border:none;
+  border-radius:8px;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+button:hover{
+  background:#00a844;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h2>REWARD LOGIN</h2>
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
+  <button id="loginBtn">LOGIN</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } 
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBqJTLjxhZBCsvjrTH_cG0fkXlElG6BqTg",
+  authDomain: "tose-ccf8f.firebaseapp.com",
+  databaseURL: "https://tose-ccf8f-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "tose-ccf8f",
+  storageBucket: "tose-ccf8f.firebasestorage.app",
+  messagingSenderId: "475447495901",
+  appId: "1:475447495901:web:9189276a162a3680afdf34"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+document.getElementById("loginBtn").addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  try{
+    await signInWithEmailAndPassword(auth,email,password);
+    window.location.href="dashboard.html";
+  }catch(e){
+    alert("Invalid login");
+  }
+});
+</script>
+
+</body>
+</html>
