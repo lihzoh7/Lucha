@@ -3,184 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Capitec Payment Integration</title>
+    <title>AI Smart Guide Test</title>
     <style>
-        :root {
-            --capitec-blue: #005470;
-            --capitec-red: #E30613;
-            --dark-bg: #121212;
-            --card-bg: #1E1E1E;
-            --text-color: #FFFFFF;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--dark-bg);
-            color: var(--text-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        .payment-container {
-            background-color: var(--card-bg);
-            border-radius: 16px;
-            padding: 30px;
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-            border: 1px solid #333;
-        }
-
-        .logo-placeholder {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            letter-spacing: 1px;
-        }
-
-        .logo-placeholder span {
-            color: var(--capitec-red);
-        }
-
-        .payment-details {
-            margin: 25px 0;
-            padding: 15px;
-            background-color: #252525;
-            border-radius: 8px;
-            border-left: 4px solid var(--capitec-blue);
-        }
-
-        .amount {
-            font-size: 32px;
-            font-weight: 800;
-            color: #fff;
-            margin: 5px 0;
-        }
-
-        .pay-btn {
-            background: linear-gradient(135deg, var(--capitec-blue) 0%, #00364d 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 15px 30px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            transition: transform 0.2s, background 0.2s;
-            box-shadow: 0 4px 12px rgba(0, 84, 112, 0.4);
-        }
-
-        .pay-btn:active {
-            transform: scale(0.98);
-        }
-
-        .status-message {
-            margin-top: 20px;
-            font-size: 14px;
-            color: #aaa;
-            min-height: 40px;
-            line-height: 1.4;
-        }
-
-        .note {
-            font-size: 11px;
-            color: #666;
-            margin-top: 25px;
-            border-top: 1px solid #333;
-            padding-top: 15px;
-        }
+        body { font-family: Arial, sans-serif; text-align: center; background: #121212; color: white; padding: 20px; }
+        video { width: 100%; max-width: 400px; border-radius: 10px; background: #222; transform: scaleX(1); }
+        button { background: #007bff; color: white; border: none; padding: 15px 25px; margin: 10px; font-size: 16px; border-radius: 5px; cursor: pointer; width: 80%; max-width: 300px; }
+        button:active { background: #0056b3; }
+        input { padding: 12px; width: 75%; max-width: 280px; border-radius: 5px; border: 1px solid #44App; margin-bottom: 10px; font-size: 16px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #333; border-radius: 8px; background: #1e1e1e; }
     </style>
 </head>
 <body>
 
-    <div class="payment-container">
-        <div class="logo-placeholder">
-            Pay with <span>Capitec</span>
-        </div>
-        <p style="color: #aaa; margin: 0;">Secure App Handoff</p>
+    <h1>AI Assistive Guide</h1>
 
-        <div class="payment-details">
-            <div style="font-size: 12px; color: #888; text-transform: uppercase;">Total Amount</div>
-            <div class="amount">R 150.00</div>
-            <div style="font-size: 14px; color: #bbb; margin-top: 5px;">Order #10243</div>
-        </div>
+    <div class="section">
+        <h3>1. Camera & Audio Guide Test</h3>
+        <video id="videoFeed" autoplay playsinline muted></video>
+        <br>
+        <button onclick="startCamera()">Start Live Camera</button>
+        <br>
+        <button onclick="speakInstruction('Go straight')">Test: Go Straight</button>
+        <button onclick="speakInstruction('Turn left')">Test: Turn Left</button>
+        <button onclick="speakInstruction('Obstacle detected, stop')">Test: Danger Stop</button>
+    </div>
 
-        <button class="pay-btn" onclick="initiateCapitecPayment()">Open Capitec App</button>
-
-        <div class="status-message" id="statusText">
-            Tap the button above to authorize via your banking app.
-        </div>
-
-        <div class="note">
-            <strong>Please Note:</strong> This launch action opens your personal banking app securely. Ensure your Capitec app is updated to the latest version.
-        </div>
+    <div class="section">
+        <h3>2. Navigation Setup</h3>
+        <button onclick="getLocation()">Get Current Location</button>
+        <p id="locationDisplay">Location: Not detected yet</p>
+        
+        <input type="text" id="destinationInput" placeholder="Enter destination (e.g. Corner House)">
+        <button onclick="startNavigation()">Start Navigation</button>
     </div>
 
     <script>
-        function initiateCapitecPayment() {
-            const statusText = document.getElementById('statusText');
-            
-            // Intent URL targeting the specific Capitec package ID on Android
-            const capitecIntentUri = "intent://#Intent;scheme=capitec;package=za.co.capitec.bank;end";
-            // Standard App Store URLs
-            const playStoreUrl = "https://play.google.com/store/apps/details?id=za.co.capitec.bank";
-            const appStoreUrl = "https://apps.apple.com/za/app/capitec-bank/id1485642055";
+        // Initialize Camera Stream
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "environment" }, // Uses the back camera
+                    audio: false 
+                });
+                document.getElementById('videoFeed').srcObject = stream;
+                speakInstruction("Camera active. Beginning stream visualization.");
+            } catch (err) {
+                alert("Error accessing camera: " + err.message);
+            }
+        }
 
-            statusText.innerHTML = "Opening Capitec App...";
-            statusText.style.color = "#00cbff";
-
-            // Detect Platform
-            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-            const isAndroid = /android/i.test(userAgent);
-            const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
-
-            // Record timestamp to check if user actually left the browser screen
-            const startTime = Date.now();
-
-            if (isAndroid) {
-                // Fire Android Deep Link intent
-                window.location.href = capitecIntentUri;
-            } else if (isIOS) {
-                // Fire generic registered iOS protocol prefix
-                window.location.href = "capitec://";
+        // Native Text to Speech Engine
+        function speakInstruction(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Stop any current speaking immediately
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 1.0; // Normal speech rate
+                window.speechSynthesis.speak(utterance);
             } else {
-                // Desktop or unidentified device fallback directly to informational site
-                statusText.innerHTML = "Deep linking is optimized for mobile devices. Please open this link on your smartphone.";
-                statusText.style.color = "#E30613";
+                console.log("Speech synthesis not supported on this device.");
+            }
+        }
+
+        // Capture Phone's Live GPS
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    document.getElementById('locationDisplay').innerText = `Lat: ${lat.toFixed(5)}, Lon: ${lon.toFixed(5)}`;
+                    speakInstruction("Location successfully locked.");
+                }, (error) => {
+                    alert("Error getting location: " + error.message);
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        // Navigation Logic Trigger
+        function startNavigation() {
+            const dest = document.getElementById('destinationInput').value;
+            if (!dest) {
+                speakInstruction("Please type a destination first.");
                 return;
             }
-
-            // Fallback Logic: If the app doesn't open within 2.5 seconds, redirect to app store
-            setTimeout(function() {
-                // If the user successfully left the browser to the banking app, 
-                // the time difference will be massive when they return. 
-                // If they never left (app not installed), time elapsed will be roughly 2500ms.
-                if (Date.now() - startTime < 2600) {
-                    statusText.innerHTML = "Capitec app not detected. Redirecting to App Store...";
-                    statusText.style.color = "#E30613";
-                    
-                    setTimeout(function() {
-                        if (isAndroid) {
-                            window.location.href = playStoreUrl;
-                        } else if (isIOS) {
-                            window.location.href = appStoreUrl;
-                        }
-                    }, 1000);
-                } else {
-                    // User successfully opened the app and returned later
-                    statusText.innerHTML = "Welcome back. Please verify transaction status on your backend dashboard.";
-                    statusText.style.color = "#00ff88";
-                }
-            }, 2500);
+            speakInstruction(`Routing calculated for ${dest}. Proceed straight for ten meters.`);
         }
     </script>
-
 </body>
 </html>
